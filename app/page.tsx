@@ -16,7 +16,7 @@ export default function Home() {
     return raw
       .split(/[\n,]+/) // split on new lines or commas
       .map((d) => d.trim().toLowerCase())
-      .filter(Boolean); // remove empty strings
+      .filter(Boolean); // remove empty strings cuased by any extra new lines
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
