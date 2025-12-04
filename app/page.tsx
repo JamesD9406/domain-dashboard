@@ -4,13 +4,15 @@ import { FormEvent, useState } from "react"
 
 import { DomainInput } from "@/components/domain-input";
 import { DomainResults } from "@/components/domain-results"
-import { DomainResult } from "@/types/domain"
+import type { DomainResult } from "@/types/domain"
+import type { LookupResponse } from "@/types/responses/lookup"
 
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [results, setResults] = useState<DomainResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function parseDomains(raw: string): string[] {
     return raw
@@ -19,40 +21,55 @@ export default function Home() {
       .filter(Boolean); // remove empty strings cuased by any extra new lines
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const domains = parseDomains(input);
 
     if (domains.length === 0) {
       setResults([]);
+      setError("Please enter at least one domain.");
       return;
     }
 
     setIsLoading(true);
+    setError(null);
 
-    const now = new Date();
+    try {
+      const response = await fetch("/api/lookup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ domains }),
+      });
 
-    const mockResults: DomainResult[] = domains.map((domain, index) => {
-      const expiry = new Date(now);
-      expiry.setMonth(expiry.getMonth() + 1 + index);
+      if (!response.ok) {
+        let message = "Lookup failed. Please try again.";
 
-      const isExpiringSoon = index % 3 === 0;
-      const hasWarning = index % 5 === 0;
+        try {
+          const data = (await response.json()) as { error?: string };
+          if (data.error) {
+            message = data.error;
+          }
+        } catch {
+          // use the default message in setError()
+        }
 
-      return {
-        domain,
-        status: isExpiringSoon ? "expiring-soon" : "ok",
-        expiryDate: expiry.toISOString(),
-        message: hasWarning ? "Example warning message" : undefined,
-      };
-    });
+        setResults([]);
+        setError(message);
+        return;
+      }
 
-    // Simulate calling an API with a delay
-    setTimeout(() => {
-      setResults(mockResults);
+      const data = (await response.json()) as LookupResponse;
+      setResults(data.results ?? []);
+    } catch (err) {
+      console.error("Error calling /api/lookup:", err);
+      setResults([]);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 400);
+    }
   }
 
   return (
@@ -67,12 +84,20 @@ export default function Home() {
             dates. We&apos;ll connect this to real RDAP data in a later step.
           </p>
         </header>
+
         <DomainInput
           value={input}
           isLoading={isLoading}
           onChange={setInput}
           onSubmit={handleSubmit}
         />
+
+        {error && (
+          <div className="mb-4 rounded-md border border-rose-700 bg-rose-900/40 px-3 py-2 text-sm text-rose-100">
+            {error}
+          </div>
+        )}
+
         <DomainResults
           results={results}
         />
