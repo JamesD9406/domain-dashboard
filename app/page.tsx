@@ -2,8 +2,8 @@
 
 import { FormEvent, useState } from "react";
 
-import { DomainInput } from "@/components/domain-input";
-import { DomainResults } from "@/components/domain-results";
+import { DomainInput } from "@/components/domain/domain-input";
+import { DomainResults } from "@/components/domain/domain-results";
 import type { DomainResult } from "@/types/domain";
 import type { LookupResponse } from "@/types/responses/lookup";
 
