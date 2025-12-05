@@ -73,18 +73,20 @@ export function DomainCard({ result, onRefreshDomain, isRefreshing }: DomainCard
       {/* Spacer to push actions down */}
       <div className="flex-1" />
 
-      {/* Footer - actions go here*/}
-      <footer className="mt-2 flex items-center justify-end gap-2">
-        <button
-          type="button"
-          onClick={() => onRefreshDomain(domain)}
-          className="inline-flex items-center rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5
-                     text-xs font-medium text-neutral-100 hover:border-neutral-500 hover:bg-neutral-800
-                     disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={isRefreshing}
-        >
-          {isRefreshing ? "Refreshing..." : "Refresh"}
-        </button>
+      {/* Footer: reserve height so no jumping, only show button when cached */}
+      <footer className="mt-2 flex min-h-[2.5rem] items-center justify-end gap-2">
+        {fromCache && (
+          <button
+            type="button"
+            onClick={() => onRefreshDomain(domain)}
+            className="inline-flex items-center rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5
+                       text-xs font-medium text-neutral-100 hover:border-neutral-500 hover:bg-neutral-800
+                       disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? "Refreshing…" : "Refresh"}
+          </button>
+        )}
       </footer>
     </article>
   );
