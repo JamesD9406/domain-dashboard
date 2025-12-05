@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import type { DomainResult } from "@/types/domain";
 import type { LookupRequest } from "@/types/requests/lookup";
+import { fetchRdapForDomains } from "@/lib/rdap";
 
 export async function POST(request: NextRequest) {
   let body: LookupRequest;
@@ -23,24 +24,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const now = new Date();
-
-  //Results still mocked but now coming from the server
-  const results: DomainResult[] = domains.map((domain, index) => {
-    const expiry = new Date(now);
-    expiry.setMonth(expiry.getMonth() + 1 + index); // stagger expiries
-
-    const isExpiringSoon = index % 3 === 0;
-    const hasWarning = index % 5 === 0;
-
-    return {
-      domain: domain.toLowerCase(),
-      status: isExpiringSoon ? "expiring-soon" : "ok",
-      expiryDate: expiry.toISOString(),
-      message: hasWarning ? "Example warning message" : undefined,
-    };
+  const skipCacheFor = Array.isArray(body.skipCacheFor)
+    ? body.skipCacheFor
+    : [];
+  
+  const results: DomainResult[] = await fetchRdapForDomains(domains, {
+    skipCacheFor
   });
-
-  return NextResponse.json({ results });
-
+  return NextResponse.json({ results })
 }
