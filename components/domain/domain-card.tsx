@@ -1,7 +1,7 @@
 "use client";
 
 import type { DomainResult } from "@/types/domain";
-import { formatDate, formatDateTime } from "@/lib/date-utils";
+import { formatDate, formatDateTime, isExpiringSoon } from "@/lib/date-utils";
 
 export type DomainCardProps = {
   result: DomainResult;
@@ -17,6 +17,8 @@ export function DomainCard({ result, onRefreshDomain, isRefreshing }: DomainCard
     fromCache,
     cachedAt,
   } = result 
+
+  const expiringSoon = isExpiringSoon(expiryDate, 90);
 
   return (
     <article
@@ -62,12 +64,18 @@ export function DomainCard({ result, onRefreshDomain, isRefreshing }: DomainCard
           <span className="text-xs uppercase tracking-wide text-neutral-500">
             Expiry
           </span>
-          <span className="font-medium text-neutral-100">
-            {expiryDate ? formatDate(expiryDate) : "Unknown"}
-          </span>
-        </div>
+           <div className="mt-0.5 flex flex-wrap items-center gap-2">
+            <span className="font-medium text-neutral-100">
+              {expiryDate ? formatDate(expiryDate) : "Unknown"}
+            </span>
 
-        {/* Future: “Expiring soon” badge will go here */}
+            {expiringSoon && (
+              <span className="inline-flex items-center rounded-full border border-rose-500/60 bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-300">
+                Expiring soon
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Spacer to push actions down */}
