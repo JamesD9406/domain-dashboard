@@ -1,24 +1,24 @@
 "use client";
 
-import { FormEvent, useState } from "react"
+import { FormEvent, useState } from "react";
 
 import { DomainInput } from "@/components/domain-input";
-import { DomainResults } from "@/components/domain-results"
-import type { DomainResult } from "@/types/domain"
-import type { LookupResponse } from "@/types/responses/lookup"
-
+import { DomainResults } from "@/components/domain-results";
+import type { DomainResult } from "@/types/domain";
+import type { LookupResponse } from "@/types/responses/lookup";
 
 export default function Home() {
   const [input, setInput] = useState("");
   const [results, setResults] = useState<DomainResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshingDomain, setRefreshingDomain] = useState<string | null>(null);
 
   function parseDomains(raw: string): string[] {
     return raw
       .split(/[\n,]+/) // split on new lines or commas
       .map((d) => d.trim().toLowerCase())
-      .filter(Boolean); // remove empty strings cuased by any extra new lines
+      .filter(Boolean); // remove empty strings caused by any extra new lines
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -72,6 +72,47 @@ export default function Home() {
     }
   }
 
+  async function handleRefreshDomain(domain: string) {
+    try {
+      setRefreshingDomain(domain);
+      setError(null);
+
+      const response = await fetch("/api/lookup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          domains: [domain],
+          skipCacheFor: [domain],   // ✅ array of strings, matches LookupRequest
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to refresh domain", domain, response.status);
+        return;
+      }
+
+      const data = (await response.json()) as LookupResponse;
+      const fresh = data.results?.[0];
+
+      if (!fresh) {
+        console.warn("No refreshed result returned for domain", domain);
+        return;
+      }
+
+      setResults((prev) =>
+        prev.map((r) =>
+          r.domain.toLowerCase() === fresh.domain.toLowerCase() ? fresh : r
+        )
+      );
+    } catch (err) {
+      console.error("Error refreshing domain", domain, err);
+    } finally {
+      setRefreshingDomain(null);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
       <div className="mx-auto max-w-4xl px-4 py-10">
@@ -80,8 +121,7 @@ export default function Home() {
             Domain Dashboard
           </h1>
           <p className="mt-2 text-sm text-slate-300">
-            Paste a list of domains to see their (mocked) status and expiry
-            dates. We&apos;ll connect this to real RDAP data in a later step.
+            Paste a list of domains to see their status and expiry dates.
           </p>
         </header>
 
@@ -100,6 +140,8 @@ export default function Home() {
 
         <DomainResults
           results={results}
+          onRefreshDomain={handleRefreshDomain}
+          refreshingDomain={refreshingDomain}
         />
       </div>
     </main>

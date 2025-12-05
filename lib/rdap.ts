@@ -4,7 +4,6 @@
 import type { DomainResult } from "@/types/domain";
 
 // RDAP Response modelling
-
 type RdapEvent = {
   eventAction?: string;
   eventDate?: string;
@@ -148,14 +147,20 @@ const RDAP_FAILURE_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 type CachedEntry = {
   result: DomainResult;
   expiresAt: number;
+  cachedAt: number;
 };
 
 const rdapCache = new Map<string, CachedEntry>();
 
+type LookupOptions = {
+  forceRefresh?: boolean;
+}
+
 // Main function lookupSingleDomain - this asctually gets RDAP response, and is called by fetchRdapForDomains() below
-async function lookupSingleDomain(domain: string): Promise<DomainResult> {
+async function lookupSingleDomain(domain: string, options?: LookupOptions): Promise<DomainResult> {
   const normalized = domain.toLowerCase().trim();
   const nowMs = Date.now();
+  const forceRefresh = options?.forceRefresh === true;
 
   if (!normalized) {
     return {
@@ -163,16 +168,26 @@ async function lookupSingleDomain(domain: string): Promise<DomainResult> {
       status: "error",
       expiryDate: undefined,
       message: "Empty domain value.",
+      fromCache: false,
     };
   }
 
   const cached = rdapCache.get(normalized);
-  if (cached && cached.expiresAt > nowMs) {
+
+  // If we are forcing a refresh do not use cache
+  if (!forceRefresh && cached && cached.expiresAt > nowMs) {
     console.log(`[RDAP] Cache HIT for ${normalized}`);
-    return cached.result;
+
+    return {
+      ...cached.result,
+      fromCache: true,
+      cachedAt: cached.cachedAt,
+    };
   }
 
-  console.log(`[RDAP] Cache MISS for ${normalized}`);
+  console.log(
+    `[RDAP] Cache MISS for ${normalized}${forceRefresh ? " (force refresh)" : ""}`,
+  );
 
   try {
     const response = await fetch(
@@ -180,18 +195,22 @@ async function lookupSingleDomain(domain: string): Promise<DomainResult> {
       { cache: "no-store" },
     );
 
+    const tld = getTldFromDomain(normalized);
+
     if (!response.ok) {
       const result: DomainResult = {
         domain: normalized,
         status: "error",
         expiryDate: undefined,
         message: `RDAP returned HTTP ${response.status}.`,
-        tld: getTldFromDomain(normalized),
+        tld,
+        fromCache: false,
       };
 
       rdapCache.set(normalized, {
         result,
         expiresAt: nowMs + RDAP_FAILURE_CACHE_TTL_MS,
+        cachedAt: nowMs,
       });
 
       return result;
@@ -203,25 +222,25 @@ async function lookupSingleDomain(domain: string): Promise<DomainResult> {
     const createdDate = getCreatedFromRdap(data);
     const updatedDate = getUpdatedFromRdap(data);
     const registrarName = getRegistrarNameFromRdap(data);
-    const tld = getTldFromDomain(normalized);
 
     const { status, message } = computeStatus(expiryFromRdap);
 
     const result: DomainResult = {
       domain: normalized,
       status,
-      // only set expiryDate if we actually got it from RDAP
-      expiryDate: expiryFromRdap ?? undefined,
+      expiryDate: expiryFromRdap ?? undefined, // only set if present
       message,
       registrarName,
       createdDate,
       updatedDate,
       tld,
+      fromCache: false,
     };
 
     rdapCache.set(normalized, {
       result,
       expiresAt: nowMs + RDAP_CACHE_TTL_MS,
+      cachedAt: nowMs,
     });
 
     return result;
@@ -234,11 +253,13 @@ async function lookupSingleDomain(domain: string): Promise<DomainResult> {
       expiryDate: undefined,
       message: "Network error calling RDAP service.",
       tld: getTldFromDomain(normalized),
+      fromCache: false,
     };
 
     rdapCache.set(normalized, {
       result,
       expiresAt: nowMs + RDAP_FAILURE_CACHE_TTL_MS,
+      cachedAt: nowMs,
     });
 
     return result;
@@ -247,20 +268,17 @@ async function lookupSingleDomain(domain: string): Promise<DomainResult> {
 
 export async function fetchRdapForDomains(
   domains: string[],
-  options?: { skipCacheFor?: string[] },
+  options?: { skipCacheFor?: string[] }
 ): Promise<DomainResult[]> {
   const skipSet = new Set(
-    (options?.skipCacheFor ?? []).map((value) => value.toLowerCase().trim()),
+    (options?.skipCacheFor ?? []).map((v) => v.toLowerCase().trim())
   );
 
   const tasks = domains.map((rawDomain) => {
     const normalized = rawDomain.trim().toLowerCase();
+    const forceRefresh = skipSet.has(normalized);
 
-    if (skipSet.has(normalized)) {
-      rdapCache.delete(normalized);
-    }
-
-    return lookupSingleDomain(normalized);
+    return lookupSingleDomain(normalized, { forceRefresh });
   });
 
   return Promise.all(tasks);

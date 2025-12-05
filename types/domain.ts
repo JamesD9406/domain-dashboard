@@ -7,4 +7,6 @@ export type DomainResult = {
   createdDate?: string;
   updatedDate?: string;
   tld?: string;
+  fromCache?: boolean;
+  cachedAt?: number;
 };

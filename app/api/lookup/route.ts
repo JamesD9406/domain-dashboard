@@ -24,7 +24,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Results no longer mocked!
-    const results: DomainResult[] = await fetchRdapForDomains(domains);
-    return NextResponse.json({ results })
+  const skipCacheFor = Array.isArray(body.skipCacheFor)
+    ? body.skipCacheFor
+    : [];
+  
+  const results: DomainResult[] = await fetchRdapForDomains(domains, {
+    skipCacheFor
+  });
+  return NextResponse.json({ results })
 }
