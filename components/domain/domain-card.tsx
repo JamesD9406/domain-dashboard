@@ -6,23 +6,17 @@ import { formatDate, formatDateTime } from "@/lib/date-utils";
 export type DomainCardProps = {
   result: DomainResult;
   onRefreshDomain: (domain: string) => void;
+  isRefreshing?: boolean;
 };
 
-type DomainResultWithExtras = DomainResult & {
-  expiryDate?: string | null;
-  registrarName?: string | null;
-  fromCache?: boolean;
-  cachedAt?: string | number | null;
-};
-
-export function DomainCard({ result, onRefreshDomain }: DomainCardProps) {
+export function DomainCard({ result, onRefreshDomain, isRefreshing }: DomainCardProps) {
   const {
     domain,
     expiryDate,
     registrarName,
     fromCache,
     cachedAt,
-  } = result as DomainResultWithExtras;
+  } = result 
 
   return (
     <article
@@ -85,9 +79,9 @@ export function DomainCard({ result, onRefreshDomain }: DomainCardProps) {
           className="inline-flex items-center rounded-md border border-neutral-700 bg-neutral-950 px-3 py-1.5
                      text-xs font-medium text-neutral-100 hover:border-neutral-500 hover:bg-neutral-800
                      disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={false}
+          disabled={isRefreshing}
         >
-          Refresh
+          {isRefreshing ? "Refreshing..." : "Refresh"}
         </button>
       </footer>
     </article>

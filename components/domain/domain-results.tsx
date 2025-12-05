@@ -5,12 +5,14 @@ export type DomainResultsProps = {
   results: DomainResult[];
   isLoading: boolean;
   onRefreshDomain: (domain: string) => void;
+  refreshingDomain: string | null
 };
 
 export function DomainResults({
   results,
   isLoading,
   onRefreshDomain,
+  refreshingDomain,
 }: DomainResultsProps) {
   const hasResults = results && results.length > 0;
 
@@ -34,6 +36,7 @@ export function DomainResults({
               key={result.domain}
               result={result}
               onRefreshDomain={onRefreshDomain}
+              isRefreshing={refreshingDomain === result.domain}
             />
           ))}
         </div>

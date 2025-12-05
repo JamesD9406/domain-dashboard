@@ -84,7 +84,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           domains: [domain],
-          skipCacheFor: [domain],   // ✅ array of strings, matches LookupRequest
+          skipCacheFor: [domain],
         }),
       });
 
@@ -140,6 +140,7 @@ export default function Home() {
 
         <DomainResults
           results={results}
+          isLoading={isLoading}
           onRefreshDomain={handleRefreshDomain}
           refreshingDomain={refreshingDomain}
         />
