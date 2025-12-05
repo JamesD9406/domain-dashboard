@@ -30,20 +30,22 @@ export function DomainCard({ result, onRefreshDomain, isRefreshing }: DomainCard
           {domain}
         </h2>
 
-        {/* Cached info row (only when cached) */}
-        {fromCache && (
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full border border-amber-500/60 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-300">
-              Cached result
-            </span>
-
-            {cachedAt && (
-              <span className="text-[10px] text-neutral-400">
-                Cached at: {formatDateTime(cachedAt)}
+        {/* Cached info row - top div keeps cards aligned regardless of cached badge */}
+        <div className="mt-1 flex min-h-[3rem] flex-wrap items-center gap-2">
+          {fromCache && (
+            <>
+              <span className="inline-flex items-center rounded-full border border-amber-500/60 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-300">
+                Cached result
               </span>
-            )}
-          </div>
-        )}
+
+              {cachedAt && (
+                <span className="text-[10px] text-neutral-400">
+                  Cached at: {formatDateTime(cachedAt)}
+                </span>
+              )}
+            </>
+          )}
+        </div>
       </header>
 
       {/* Registrar */}
