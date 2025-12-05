@@ -235,6 +235,7 @@ async function lookupSingleDomain(domain: string, options?: LookupOptions): Prom
       updatedDate,
       tld,
       fromCache: false,
+      rdapRaw: data,
     };
 
     rdapCache.set(normalized, {

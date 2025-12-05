@@ -9,4 +9,5 @@ export type DomainResult = {
   tld?: string;
   fromCache?: boolean;
   cachedAt?: number;
+  rdapRaw?: unknown;
 };
