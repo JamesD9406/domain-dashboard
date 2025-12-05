@@ -59,7 +59,7 @@ export function DomainResults({ results }: DomainResultsProps) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-200 sm:text-sm">
-                    {formatDate(result.expiryDate)}
+                    {result.expiryDate ? formatDate(result.expiryDate) : "Unknown"}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-400 sm:text-sm">
                     {result.message ?? "\u2014"}
