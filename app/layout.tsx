@@ -14,7 +14,19 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Domain Dashboard",
-  description: "Generated using create next app",
+  description: "Check domain expiry, status, and RDAP details at a glance.",
+   icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-64.png",
+    apple: "/apple-touch-icon.png",
+    other: [
+      {
+        rel: "icon",
+        url: "/icon-192.png",
+        sizes: "192x192",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
