@@ -168,8 +168,11 @@ async function lookupSingleDomain(domain: string): Promise<DomainResult> {
 
   const cached = rdapCache.get(normalized);
   if (cached && cached.expiresAt > nowMs) {
+    console.log(`[RDAP] Cache HIT for ${normalized}`);
     return cached.result;
   }
+
+  console.log(`[RDAP] Cache MISS for ${normalized}`);
 
   try {
     const response = await fetch(
