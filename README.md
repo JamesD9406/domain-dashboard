@@ -1,6 +1,6 @@
 # Domain Dashboard — RDAP-Powered Domain Intelligence (Next.js 16)
 
-[![Vercel Deploy Status](https://img.shields.io/github/deployments/YOUR-GITHUB-USERNAME/domain-dashboard/production?label=vercel&logo=vercel)](https://domain-dashboard-drab.vercel.app/)
+[![Vercel Deploy Status](https://img.shields.io/github/deployments/JamesD9406/domain-dashboard/production?label=vercel&logo=vercel)](https://domain-dashboard-drab.vercel.app/)
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
@@ -17,55 +17,82 @@ This project demonstrates full-stack engineering, API design, typed data modelin
 
 ## 📸 Screenshots
 
-### Main Dashboard & Expanded Card (Displayed Horizontally)
+### 🟦 Start Screen (empty state)
 
 <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-  <img src="https://github.com/user-attachments/assets/3548d4c2-f514-4678-81c6-3745d9b5cd12" width="48%" alt="Dashboard Screenshot"/>
-  <img src="https://github.com/user-attachments/assets/5760b753-42b4-489d-8597-49a3d62b9447" width="48%" alt="Expanded RDAP Details Screenshot"/>
+  <img src="public/start-screen.png" width="100%" alt="Empty dashboard start screen"/>
 </div>
+
+---
+
+### 🟧 Lookup Results — Closed Cards (with expiring badge + search functionality)
+
 <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-  <img src="https://github.com/user-attachments/assets/bea21757-2a91-43a0-8bc4-389e4ec1354d" width="48%" alt="Showing Cached Results and Refresh Button"/>
-  <img src="https://github.com/user-attachments/assets/ced1972f-e9c2-4ea2-b604-955951619322" width="48%" alt="After Refresh Button and Showing RDAP Details"/>
+  <img src="public/closed-cards-with-expiring-and-search.png" width="100%" alt="Closed domain cards showing expiry and search sorting"/>
+</div>
+
+---
+
+### 🟨 Expanded RDAP Details (shows caching + structured metadata)
+
+<div style="display: flex; gap: 12px; margin-bottom: 20px;">
+  <img src="public/expanded-details.png" width="100%" alt="Expanded domain details showing RDAP events and metadata"/>
+</div>
+
+---
+
+### 🟩 Expanded Details After Refresh (shows uncached result + raw DomainResult)
+
+<div style="display: flex; gap: 12px; margin-bottom: 20px;">
+  <img src="public/expanded-details-after-refresh-shows-raw-rdap.png" width="100%" alt="Expanded details after refresh showing raw DomainResult"/>
 </div>
 
 ---
 
 ## 🚀 Features
 
-### 🔍 Multi-Domain RDAP Lookup
-- Enter one or many domains separated by commas or spaces.
-- Unified RDAP normalization across multiple registry formats.
-- Human-readable expiry times: “in 3 months”, “2 years ago”, etc.
+### 🔍 Multi-domain RDAP lookup
+- Paste one or more domains into a single textarea.
+- Supports new lines or comma-separated lists.
+- Clear empty state: “No domains looked up yet” with guidance text.
+- One click on **Lookup Domains** triggers lookups for all domains.
 
-### ⚡ Smart Per-Domain Caching
-- Cached results clearly labeled.
-- Per-domain **Refresh** button forces a fresh RDAP lookup.
-- Avoids reloading all results unnecessarily.
-- Successfull results are chaced for 24 hours, failed results are cached for 5 minutes
+### 📊 Card-based results focused on expiry
+- One card per domain, showing:
+  - Domain name
+  - Registrar
+  - Expiry date
+- Expiring domains are visually highlighted:
+  - Red border around the card
+  - **EXPIRING SOON** badge on the expiry date
+- Summary line (e.g. “Showing 3 domains”) keeps users oriented.
 
-### 📦 Expandable Domain Cards
-Each card displays:
-- Domain name  
-- Registrar  
-- Expiry date + relative time  
-- Statuses  
-- Cached indicator  
+### ↕ Sorting by expiry
+- Sort dropdown (e.g. **Expiry (soonest first)**) lets users see the most urgent domains first.
+- Sorting updates the card order without reloading the page.
 
-Expanding reveals:
-- Full RDAP event list  
-- Entities (registrant, registrar, technical contacts)  
-- Nameservers  
-- Additional metadata  
+### ⚡ Caching and per-domain refresh
+- **Cached result** badge appears on cards when data came from cache.
+- Cached timestamp (“Cached at: …”) shows when the data was last fetched.
+- **Refresh** button on each card:
+  - Forces a fresh RDAP lookup for that domain only.
+  - Other cards stay visible and untouched.
+  - After refresh, the cached badge updates/clears accordingly.
 
-### 🎨 Modern UI
-- TailwindCSS styling  
-- Reactive, responsive layout  
-- Professional card design  
+### 📂 Expandable details view
+- **Show details / Hide details** toggle on each card.
+- Expanded section includes key RDAP-derived fields such as:
+  - Registration date
+  - TLD
+  - Last updated date
+  - Status summary (e.g. “OK — Domain expires in about 704 days.”)
+  - Time to expiry in days
+- Optional **“View raw data (DomainResult)”** panel shows the full JSON object powering the UI.
 
-### 🛠️ Strong TypeScript Modeling
-- RDAP event/entity types  
-- Strict TypeScript across client + server  
-- Predictable data flow  
+### 🎨 Polished, recruiter-ready UI
+- Dark theme dashboard layout with a centered input panel.
+- Consistent spacing, hierarchy, and typography.
+- Responsive card layout that remains readable on larger screens.
 
 ---
 
