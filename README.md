@@ -89,7 +89,7 @@ This project demonstrates full-stack engineering, API design, typed data modelin
   - Time to expiry in days
 - Optional **“View raw data (DomainResult)”** panel shows the full JSON object powering the UI.
 
-### 🎨 Polished, recruiter-ready UI
+### 🎨 Polished, production-ready UI
 - Dark theme dashboard layout with a centered input panel.
 - Consistent spacing, hierarchy, and typography.
 - Responsive card layout that remains readable on larger screens.
